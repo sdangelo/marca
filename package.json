@@ -1,0 +1,23 @@
+{
+  "name": "marca",
+  "version": "0.0.0",
+  "description": "Minimal extensible markup language",
+  "main": "marca.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sdangelo/marca.git"
+  },
+  "keywords": [
+    "markup",
+    "language"
+  ],
+  "author": "Stefano D'Angelo <zanga.mail@gmail.com> (http://sdangelo.github.io/)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sdangelo/marca/issues",
+    "email": "zanga.mail@gmail.com"
+  }
+}
