@@ -20,9 +20,19 @@ module.exports = function (Marca)
 		children: null,
 		meta: null,
 
-		init: function (node, elementProtos) {
+		init: function (node, elementProtos, pushAttrs) {
 			this.children = [];
 			this.meta = {};
+
+			if (this.pushAttrs) {
+				if (pushAttrs)
+					for (var a in this.pushAttrs)
+						pushAttrs[a]
+							= this.pushAttrs[a];
+				else
+					pushAttrs =
+						Object.create(this.pushAttrs);
+			}
 
 			for (var i = 0;
 			     node.children && i < node.children.length; i++) {
@@ -36,6 +46,12 @@ module.exports = function (Marca)
 					proto = Marca.DOMElement;
 
 				this.children[i] = Object.create(proto);
+
+				if (pushAttrs)
+					for (a in pushAttrs)
+						this.children[i][a] =
+							pushAttrs[a];
+
 				this.children[i].init(node.children[i],
 						      elementProtos);
 			}
