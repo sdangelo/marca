@@ -52,7 +52,7 @@ module.exports = function (Marca)
 				break;
 
 			var elemBeginRe =
-				/^\{\s*(\w+)\s*((?:\w+="(?:(?:[^"\\]|\\"|\\\\)*)"\s*)*):/;
+				/^\{\s*([\w\-]+)\s*((?:[\w\-]+="(?:(?:[^"\\]|\\"|\\\\)*)"\s*)*):/;
 			var elemBegin = elemBeginRe.exec(string);
 			if (!elemBegin)
 				throw "syntax error";
@@ -64,7 +64,7 @@ module.exports = function (Marca)
 
 			var elem = { id: elemBegin[1], attributes: {},
 				     children: p.nodes };
-			var attrRe = /(\w+)="((?:[^"\\]|\\"|\\\\)*)"\s*/g;
+			var attrRe = /([\w\-]+)="((?:[^"\\]|\\"|\\\\)*)"\s*/g;
 			var attr;
 			while ((attr = attrRe.exec(elemBegin[2])) != null)
 				elem.attributes[attr[1]] =

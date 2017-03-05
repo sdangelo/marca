@@ -1,6 +1,6 @@
 {
   "name": "marca",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Minimal extensible markup language",
   "main": "marca.js",
   "scripts": {

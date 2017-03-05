@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Stefano D'Angelo <zanga.mail@gmail.com>
+ * Copyright (C) 2016, 2017 Stefano D'Angelo <zanga.mail@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,8 +19,17 @@ module.exports = function (Marca)
 	Marca.DOMElement = {
 		children: null,
 		meta: null,
+		name: "Marca",
 
 		init: function (node, elementProtos, pushAttrs) {
+			var protos = elementProtos;
+			if (Array.isArray(protos)) {
+				protos = {};
+				for (var i = 0; i < elementProtos.length; i++)
+					for (var p in elementProtos[i])
+						protos[p] = elementProtos[i][p];
+			}
+
 			this.children = [];
 			this.meta = {};
 
@@ -39,9 +48,8 @@ module.exports = function (Marca)
 				var proto;
 				if (typeof node.children[i] == "string")
 					proto = Marca.DOMElementText;
-				else if (node.children[i].id in elementProtos)
-					proto = elementProtos[
-							node.children[i].id];
+				else if (node.children[i].id in protos)
+					proto = protos[node.children[i].id];
 				else
 					proto = Marca.DOMElement;
 
@@ -52,8 +60,7 @@ module.exports = function (Marca)
 						this.children[i][a] =
 							pushAttrs[a];
 
-				this.children[i].init(node.children[i],
-						      elementProtos);
+				this.children[i].init(node.children[i], protos);
 			}
 
 			var ta = this.initContent(node);
@@ -78,40 +85,68 @@ module.exports = function (Marca)
 	};
 
 	Marca.DOMElementRoot = Object.create(Marca.DOMElement);
+	Marca.DOMElementRoot.name = "root";
 
 	Marca.DOMElementText = Object.create(Marca.DOMElement);
+	Marca.DOMElementText.name = "text";
 	Marca.DOMElementText.initContent = function (node) {
 		this.text = node;
 		return [];
 	};
 
+	Marca.DOMElementTextOnly = Object.create(Marca.DOMElement);
+	Marca.DOMElementTextOnly.name = "text-only";
+	Marca.DOMElementTextOnly.initContent = function (node) {
+		var ta = Marca.DOMElement.initContent.call(this, node);
+
+		for (var i = 0; i < this.children.length; i++) {
+			var child = this.children[i];
+			if (!(Marca.DOMElementText.isPrototypeOf(child)))
+				throw this.name + " element's child is not a "
+				      + "text element";
+		}
+
+		return ta;
+	};
+
 	Marca.DOMElementThrowAway = Object.create(Marca.DOMElement);
+	Marca.DOMElementThrowAway.name = "throw-away";
 	Marca.DOMElementThrowAway.process = function (parent, position) {
 	};
 
-	Marca.DOMElementComment = Object.create(Marca.DOMElementThrowAway);
-	Marca.DOMElementComment.initContent = function (node) {
-		if (this.children.length > 1)
-			throw "comment contains multiple children element";
-		if (!(Marca.DOMElementText.isPrototypeOf(this.children[0])))
-			throw "comment's child is not a text element";
-		return [];
-	};
+	Marca.DOMElementTextOnlyThrowAway =
+		Object.create(Marca.DOMElementThrowAway);
+	Marca.DOMElementTextOnlyThrowAway.name = "text-only throw-away";
+	Marca.DOMElementTextOnlyThrowAway.initContent =
+		Marca.DOMElementTextOnly.initContent;
 
-	Marca.DOMElementMeta = Object.create(Marca.DOMElementThrowAway);
+	Marca.DOMElementComment =
+		Object.create(Marca.DOMElementThrowAway);
+	Marca.DOMElementComment.name = "comment";
+
+	Marca.DOMElementMeta = Object.create(Marca.DOMElementTextOnlyThrowAway);
+	Marca.DOMElementMeta.name = "meta";
 	Marca.DOMElementMeta.initContent = function (node) {
+		var ta = Marca.DOMElementTextOnlyThrowAway
+			      .initContent.call(this, node);
+
 		if (!("key" in node.attributes))
-			throw "meta without key attribute";
-		if (this.children.length > 1)
-			throw "meta contains multiple children element";
-		if (!(Marca.DOMElementText.isPrototypeOf(this.children[0])))
-			throw "meta's child is not a text element";
+			throw this.name + " element without key attribute";
 
 		this.key = node.attributes.key;
-		this.value = JSON.parse(this.children[0].text);
-		return [];
+		var s = '';
+		for (var i = 0; i < this.children.length; i++)
+			s += this.children[i].text;
+		this.value = JSON.parse(s);
+
+		return ta;
 	};
 	Marca.DOMElementMeta.process = function (parent, position) {
 		parent.meta[this.key] = this.value;
+	};
+
+	Marca.CommonElementProtos = {
+		c:	Marca.DOMElementComment,
+		meta:	Marca.DOMElementMeta
 	};
 };
