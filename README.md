@@ -14,6 +14,9 @@ I am too lazy to explain hows and whys.
 * generic post-processing? (marca-hypertext-highlight)
 * dynamic tag definitions a la LaTeX? file includes? (marca-math)
 * different kinds of attribute propagation and default attrs? (marca-math)
+* comment supported by parser (allow anything inside)?
+* text-only as initContent?
+* empty element without ":"?
 * browserification;
 * API review;
 * documentation;
